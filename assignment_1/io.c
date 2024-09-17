@@ -1,6 +1,7 @@
 
 #include <errno.h>
 #include <unistd.h>
+#include "utils.h"
 
 #include "io.h"
 
@@ -39,16 +40,17 @@ int write_string(char *s) {
  * If no errors occur, it returns 0, otherwise EOF
  */
 int write_int(int n) {
-  char charBuff[64];
-  charBuff[63] = '\0';
-  int temp = n;
-  int i;
-  for (int i = 62; temp != 0; i--) {
-    charBuff[i] = (temp % 10) + '0';
-    temp = temp / 10;
+  struct Node *stack = NULL;
+  while (n != 0) {
+    struct Node *node = malloc(sizeof(struct Node));
+    node->value = n % 10;
+    node->next = NULL;
+    push(&stack, node);
+    n = n / 10;
   }
-  ssize_t result = write(1, charBuff + i, 63 - i);
-  if (result == -1)
-    return EOF;
+  while (stack != NULL) {
+    char c = pop(&stack) + '0';
+    write_char(c);
+  }
   return 0;
 }
