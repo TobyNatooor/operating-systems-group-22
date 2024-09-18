@@ -1,21 +1,20 @@
 #include "utils.h"
 
-int* pop(struct Node **stack) {
+int *pop(struct Node **stack) {
   if (*stack == NULL) {
     return NULL;
   }
   struct Node *last = *stack;
-  while(last->next != NULL) {
+  while (last->next != NULL) {
     last = last->next;
   }
   if (last->prev != NULL) {
     last->prev->next = NULL;
+  } else {
+    *stack = NULL;
   }
   int *value = malloc(sizeof(int));
   *value = last->value;
-  if ((*stack)->next == NULL) {
-    *stack = NULL;
-  }
   free(last);
   return value;
 }
@@ -26,14 +25,14 @@ void push(struct Node **stack, struct Node *node) {
     return;
   }
   struct Node *last = *stack;
-  while(last->next != NULL) {
+  while (last->next != NULL) {
     last = last->next;
   }
   last->next = node;
   node->prev = last;
 }
 
-int* dequeue(struct Node **stack) {
+int *dequeue(struct Node **stack) {
   if (*stack == NULL) {
     return NULL;
   }

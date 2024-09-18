@@ -47,16 +47,12 @@ int main() {
       node->next = NULL;
       node->prev = NULL;
       push(&collection, node);
-      count++;
-      break;
-    case 'b':
-      count++;
       break;
     case 'c':
       pop(&collection);
-      count++;
       break;
     }
+      count++;
   } while (c == 'a' || c == 'b' || c == 'c');
 
   while (collection != NULL) {
