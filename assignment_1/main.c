@@ -52,15 +52,15 @@ int main() {
       pop(&collection);
       break;
     }
-      count++;
+    count++;
   } while (c == 'a' || c == 'b' || c == 'c');
 
   while (collection != NULL) {
     int *value = dequeue(&collection);
-    // if (*value == 0 || value != NULL) {
+    if (value != NULL) {
       write_int(*value);
       free(value);
-    // }
+    }
     if (collection != NULL) {
       write_char(',');
     }
