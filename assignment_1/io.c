@@ -41,14 +41,14 @@ int write_string(char *s) {
  */
 int write_int(int n) {
   struct Node *stack = NULL;
-  while (n != 0) {
+  do {
     struct Node *node = malloc(sizeof(struct Node));
     node->value = n % 10;
     node->next = NULL;
     node->prev = NULL;
     push(&stack, node);
     n = n / 10;
-  }
+  } while (n != 0);
   while (stack != NULL) {
     int *value = pop(&stack);
     if (value != NULL) {

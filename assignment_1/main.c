@@ -42,7 +42,6 @@ int main() {
     c = read_char();
     switch (c) {
     case 'a':
-      // include in push funciton??
       node = malloc(sizeof(struct Node));
       node->value = count;
       node->next = NULL;
@@ -61,13 +60,14 @@ int main() {
   } while (c == 'a' || c == 'b' || c == 'c');
 
   while (collection != NULL) {
-    int *value = pop(&collection);
-    if (value != NULL) {
+    int *value = dequeue(&collection);
+    // if (*value == 0 || value != NULL) {
       write_int(*value);
-    }
-    // if (collection->next != NULL) {
-      write_char(',');
+      free(value);
     // }
+    if (collection != NULL) {
+      write_char(',');
+    }
   }
   write_string(";\n");
 

@@ -4,12 +4,19 @@ int* pop(struct Node **stack) {
   if (*stack == NULL) {
     return NULL;
   }
-  struct Node *top = *stack;
-  (*stack)->prev = NULL;
-  *stack = top->next;
+  struct Node *last = *stack;
+  while(last->next != NULL) {
+    last = last->next;
+  }
+  if (last->prev != NULL) {
+    last->prev->next = NULL;
+  }
   int *value = malloc(sizeof(int));
-  *value = top->value;
-  free(top);
+  *value = last->value;
+  if ((*stack)->next == NULL) {
+    *stack = NULL;
+  }
+  free(last);
   return value;
 }
 
@@ -18,17 +25,20 @@ void push(struct Node **stack, struct Node *node) {
     *stack = node;
     return;
   }
-  node->next = *stack;
-  (*stack)->prev = node;
-  *stack = node;
+  struct Node *last = *stack;
+  while(last->next != NULL) {
+    last = last->next;
+  }
+  last->next = node;
+  node->prev = last;
 }
 
 int* dequeue(struct Node **stack) {
+  if (*stack == NULL) {
+    return NULL;
+  }
   struct Node *first = *stack;
   *stack = first->next;
-  while (first->next != NULL) {
-    first = first->next;
-  }
   int *value = malloc(sizeof(int));
   *value = first->value;
   free(first);
