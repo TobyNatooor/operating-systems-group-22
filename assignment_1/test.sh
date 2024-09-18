@@ -22,3 +22,8 @@ out="0,1,2,7"
 
 [[ $(./cmd_int <<< "$in") == "$out"* ]] && echo "PASSED_4" || echo "FAILED_4"
 
+in="aaaqaaa"
+out="0,1,2"
+
+[[ $(./cmd_int <<< "$in") == "$out"* ]] && echo "PASSED_5" || echo "FAILED_5"
+
