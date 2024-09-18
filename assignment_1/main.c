@@ -2,7 +2,6 @@
 
 /* You are not allowed to use <stdio.h> */
 #include "io.h"
-#include <stdio.h>
 
 /**
  * @name  main
