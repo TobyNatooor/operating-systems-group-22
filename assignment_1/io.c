@@ -1,7 +1,7 @@
 
+#include "utils.h"
 #include <errno.h>
 #include <unistd.h>
-#include "utils.h"
 
 #include "io.h"
 
@@ -45,12 +45,16 @@ int write_int(int n) {
     struct Node *node = malloc(sizeof(struct Node));
     node->value = n % 10;
     node->next = NULL;
+    node->prev = NULL;
     push(&stack, node);
     n = n / 10;
   }
   while (stack != NULL) {
-    char c = pop(&stack) + '0';
-    write_char(c);
+    int *value = pop(&stack);
+    if (value != NULL) {
+      char c = *value + '0';
+      write_char(c);
+    }
   }
   return 0;
 }
