@@ -40,21 +40,14 @@ int write_string(char *s) {
  * If no errors occur, it returns 0, otherwise EOF
  */
 int write_int(int n) {
-  struct Node *stack = NULL;
-  do {
-    struct Node *node = malloc(sizeof(struct Node));
-    node->value = n % 10;
-    node->next = NULL;
-    node->prev = NULL;
-    push(&stack, node);
-    n = n / 10;
-  } while (n != 0);
-  while (stack != NULL) {
-    int *value = pop(&stack);
-    if (value != NULL) {
-      char c = *value + '0';
-      write_char(c);
-    }
+  int val = 1;
+  while((n / val) > 10) {
+    val *= 10;
   }
+  while(val >= 10) {
+    write_char((n / val) + '0');
+    val /= 10;
+  }
+  write_char((n / val) + '0');
   return 0;
 }
