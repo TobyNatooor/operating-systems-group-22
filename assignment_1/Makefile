@@ -6,10 +6,10 @@ CCOPT = -std=c11 -g
 
 CFLAGS = $(CCWARNINGS) $(CCOPT)
 
-DEMO_SOURCES := io_demo.c io.c utils.c
+DEMO_SOURCES := io_demo.c io.c list.c
 DEMO_OBJECTS := $(DEMO_SOURCES:.c=.o)
 
-MAIN_SOURCES := main.c io.c utils.c
+MAIN_SOURCES := main.c io.c list.c
 MAIN_OBJECTS := $(MAIN_SOURCES:.c=.o)
 
 DEMO_EXECUTABLE = io_demo

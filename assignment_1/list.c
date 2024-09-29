@@ -1,4 +1,4 @@
-#include "utils.h"
+#include "list.h"
 
 int *pop(struct Node **stack) {
   if (*stack == NULL) {
