@@ -28,7 +28,7 @@ int write_string(char *s) {
   if (s == NULL)
     return EOF;
   while (*s != '\0') {
-    ssize_t result = write(1, s, 1);
+    ssize_t result = write_char(*s);
     if (result == -1)
       return EOF;
     s = s + 1;
