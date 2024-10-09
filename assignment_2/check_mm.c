@@ -268,6 +268,15 @@ START_TEST(test_memory_exerciser) {
 
 END_TEST
 
+START_TEST(test_next_fit_strategy) {
+  BlockHeader *a = MALLOC(0x50);
+  BlockHeader *b = MALLOC(0x20);
+  FREE(a);
+  BlockHeader *c = MALLOC(0x10);
+  ck_assert((uintptr_t)b < (uintptr_t)c);
+}
+END_TEST
+
 /**
  * { You may provide more unit tests here, but remember to add them to
  * simple_malloc_suite }
@@ -285,6 +294,7 @@ Suite *simple_malloc_suite() {
   tcase_add_test(tc_core, test_simple_allocation);
   tcase_add_test(tc_core, test_simple_unique_addresses);
   tcase_add_test(tc_core, test_memory_exerciser);
+  tcase_add_test(tc_core, test_next_fit_strategy);
 
   suite_add_tcase(s, tc_core);
   return s;
