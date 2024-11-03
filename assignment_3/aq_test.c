@@ -31,8 +31,11 @@ void * producer (void * arg) {
 
 void * consumer(void * arg) {
   get(q);
+  printf("ccc\n");
   get(q);
+  printf("aaa\n");
   get(q);
+  printf("bbb\n");
 
   return 0;
 }
@@ -58,10 +61,12 @@ int main(int argc, char ** argv) {
   /* Fork threads */
   pthread_create(&t1, NULL, producer, NULL);
   pthread_create(&t2, NULL, consumer, NULL);
-  
+  printf("test\n");
   /* Join with all threads */
   pthread_join(t1, &res1);
+  printf("abc\n");
   pthread_join(t2, &res2);
+  printf("123\n");
 
   printf("----------------\n");
   printf("Threads terminated with %ld, %ld\n", (uintptr_t) res1, (uintptr_t) res2);
