@@ -9,111 +9,91 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-typedef struct QueueNode {
-  struct QueueNode *next;
-  MsgKind *msg;
-  int msgType;
-} QueueNode;
-
-// typedef struct {
-//   int value;
-// } Msg;
-
 #define FALSE 0
 #define TRUE 1
+#define CAPACITY 1000
+
+typedef struct Queue {
+  MsgKind *msgs[CAPACITY];
+  int msgTypes[CAPACITY];
+  int curr;
+  int size;
+} Queue;
 
 AlarmQueue aq_create() {
-  // TODO: remove header queue?
-
-  // Create empty header queue nodde
-  QueueNode *start_aq = malloc(sizeof(QueueNode));
-  start_aq->msg = NULL;
-  start_aq->next = NULL;
-  start_aq->msgType = -1;
-  return (AlarmQueue)start_aq;
+  // Allocate queue struct
+  Queue *q = malloc(sizeof(Queue));
+  q->size = 0;
+  q->curr = 0;
+  return (AlarmQueue)q;
 }
 
 int aq_send(AlarmQueue aq, void *msg, MsgKind k) {
   // Cast aq to type QueueNode
-  QueueNode *q = (QueueNode *)aq;
+  Queue *q = (Queue *)aq;
   // Check for more than more alarm queue
   int alarmExists = FALSE;
-  // Get the last queue node
-  while (q->next != NULL) {
-    // Check if an alarm exists
-    if (q->next->msgType == AQ_ALARM) {
-      alarmExists = TRUE;
+  // Check for multiple alarms
+  if (k == AQ_ALARM) {
+    // Return error if there already exists an alarm
+    for (int i = 0; i < q->size; i++) {
+      if (q->msgTypes[(q->curr + i) % CAPACITY] == AQ_ALARM) {
+        alarmExists = TRUE;
+      }
     }
-    // Get next queue node
-    q = q->next;
   }
-  // Create new queue node
-  QueueNode *new_aq = malloc(sizeof(QueueNode));
-  new_aq->msg = msg;
-  new_aq->msgType = k;
   // Place differently depending on the queue type
   if (k == AQ_ALARM) {
-    printf("alarm queue\n");
-    if (alarmExists) {
+    if (alarmExists == TRUE) {
       return AQ_NO_ROOM;
     }
-    q = (QueueNode *)aq;
-    if (q->next == NULL) {
-      q->next = new_aq;
-    } else {
-      new_aq->next = q->next;
-      q->next = new_aq;
+    // Loops around to the end of the array if out of bounds
+    q->curr--;
+    if (q->curr <= 0) {
+      q->curr = CAPACITY - 1;
     }
-    return 0;
+    // Append message and message type to start and increment size by one
+    q->msgs[q->curr] = msg;
+    q->msgTypes[q->curr] = k;
   } else {
-    printf("normal queue\n");
-    q->next = new_aq;
-    // Return success status
-    return 0;
+    // Append message and message type to the end and increment size by one
+    q->msgs[(q->curr + q->size) % CAPACITY] = msg;
+    q->msgTypes[(q->curr + q->size) % CAPACITY] = k;
   }
+  q->size++;
+  printf("curr: %i, size: %i\n", q->curr, q->size);
+  return 0;
 }
 
 int aq_recv(AlarmQueue aq, void **msg) {
   // Cast aq to type QueueNode
-  QueueNode *q = (QueueNode *)aq;
+  Queue *q = (Queue *)aq;
   // Check if queue is empty
-  if (q->next == NULL) {
+  if (q->size == 0) {
     return AQ_NO_MSG;
   }
-  QueueNode *aq_rec = q->next;
-  q->next = aq_rec->next;
-  *msg = aq_rec->msg;
-  int msgType = aq_rec->msgType;
-  free(aq_rec);
+  *msg = q->msgs[q->curr];
+  MsgKind msgType = q->msgTypes[q->curr];
+  // Loops around to the end of the array if 0
+  q->curr++;
+  if (q->curr >= CAPACITY) {
+    q->curr = 0;
+  }
+  q->size--;
   return msgType;
 }
 
-int aq_size(AlarmQueue aq) {
-  // Cast aq to type QueueNode
-  QueueNode *q = (QueueNode *)aq;
-  // Number of messages
-  int size = 0;
-  while (q->next != NULL) {
-    size++;
-    q = q->next;
-    // printf("message: %i\n", ((Msg*)q->msg)->value);
-  }
-  return size;
-}
+int aq_size(AlarmQueue aq) { return ((Queue *)aq)->size; }
 
 int aq_alarms(AlarmQueue aq) {
   // Cast aq to type QueueNode
-  QueueNode *q = (QueueNode *)aq;
+  Queue *q = (Queue *)aq;
   // Number of alarm messages
-  int size = 0;
-  // Get the last queue node
-  while (q->next != NULL) {
-    // Check if an alarm exists
-    if (q->next->msgType == AQ_ALARM) {
-      size++;
+  int alarms = 0;
+  for (int i = 0; i < q->size; i++) {
+    if (q->msgTypes[(q->curr + i) % CAPACITY] == AQ_ALARM) {
+      alarms++;
     }
-    // Get next queue node
-    q = q->next;
   }
-  return size;
+  return alarms;
 }
