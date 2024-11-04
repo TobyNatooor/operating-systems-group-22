@@ -54,12 +54,12 @@ int aq_send(AlarmQueue aq, void *msg, MsgKind k) {
   NormalMsg *nm = q->normalMsgs;
   if (nm == NULL) {
     q->normalMsgs = nmNew;
-    return 0;
+  } else {
+    while (nm->next != NULL) {
+      nm = nm->next;
+    }
+    nm->next = nmNew;
   }
-  while (nm->next != NULL) {
-    nm = nm->next;
-  }
-  nm->next = nmNew;
   return 0;
 }
 
