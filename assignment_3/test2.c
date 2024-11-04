@@ -1,4 +1,5 @@
 
+#include <assert.h>
 #include <pthread.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -8,31 +9,26 @@
 
 #include "aux.h"
 
-/**
- * Concurrent program that sends and receives a few integer messages
- * in order to demonstrate the basic use of the thread-safe Alarm Queue Library
- *
- * By using sleeps we (try to) control the scheduling of the threads in
- * order to obtain specific execution scenarios.  But there is no guarantee.
- *
- */
-
 static AlarmQueue q;
 
-void *alarms(void *arg) {
-  msleep(500);
-  put_normal(q, 1);
-  msleep(500);
+void *producer(void *arg) {
+  put_alarm(q, 1);
   put_normal(q, 2);
   put_normal(q, 3);
+  put_normal(q, 4);
+  put_alarm(q, 5);
 
   return 0;
 }
 
 void *consumer(void *arg) {
-  get(q);
-  get(q);
-  get(q);
+  msleep(500);
+  assert(get(q) == 1);
+  msleep(500);
+  assert(get(q) == 5);
+  assert(get(q) == 2);
+  assert(get(q) == 3);
+  assert(get(q) == 4);
 
   return 0;
 }
@@ -56,7 +52,7 @@ int main(int argc, char **argv) {
   printf("----------------\n");
 
   /* Fork threads */
-  pthread_create(&t1, NULL, alarms, NULL);
+  pthread_create(&t1, NULL, producer, NULL);
   pthread_create(&t2, NULL, consumer, NULL);
   /* Join with all threads */
   pthread_join(t1, &res1);

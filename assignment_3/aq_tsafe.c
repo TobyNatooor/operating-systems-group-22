@@ -16,7 +16,7 @@
 #define CAPACITY 1000
 
 static pthread_mutex_t mutex;
-static pthread_cond_t cond_rec;
+static pthread_cond_t cond_rec, cond_send;
 
 typedef struct NormalMsg {
   struct NormalMsg *next;
@@ -45,8 +45,8 @@ int aq_send(AlarmQueue aq, void *msg, MsgKind k) {
   // Check for multiple alarms
   if (k == AQ_ALARM) {
     // Return error if there already exists an alarm
-    if (q->alarmMsg != NULL) {
-      return AQ_NO_ROOM;
+    while (aq_alarms(aq) != 0) {
+      pthread_cond_wait(&cond_send, &mutex);
     }
     q->alarmMsg = msg;
     q->size++;
@@ -91,12 +91,14 @@ int aq_recv(AlarmQueue aq, void **msg) {
     q->size--;
     *msg = nm->normalMsg;
     free(nm);
+    pthread_cond_signal(&cond_send);
     pthread_mutex_unlock(&mutex);
     return AQ_NORMAL;
   }
   *msg = q->alarmMsg;
   q->alarmMsg = NULL;
   q->size--;
+  pthread_cond_signal(&cond_send);
   pthread_mutex_unlock(&mutex);
   return AQ_ALARM;
 }
