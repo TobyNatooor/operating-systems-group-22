@@ -13,87 +13,84 @@
 #define TRUE 1
 #define CAPACITY 1000
 
-typedef struct Queue {
-  MsgKind *msgs[CAPACITY];
-  int msgTypes[CAPACITY];
-  int curr;
+typedef struct NormalMsg {
+  struct NormalMsg *next;
+  MsgKind *normalMsg;
+} NormalMsg;
+
+typedef struct QueueHead {
+  NormalMsg *normalMsgs;
+  MsgKind *alarmMsg;
   int size;
-} Queue;
+} QueueHead;
 
 AlarmQueue aq_create() {
-  // Allocate queue struct
-  Queue *q = malloc(sizeof(Queue));
+  // Allocate QueueHead struct
+  QueueHead *q = malloc(sizeof(QueueHead));
+  q->normalMsgs = NULL;
+  q->alarmMsg = NULL;
   q->size = 0;
-  q->curr = 0;
   return (AlarmQueue)q;
 }
 
 int aq_send(AlarmQueue aq, void *msg, MsgKind k) {
   // Cast aq to type QueueNode
-  Queue *q = (Queue *)aq;
-  // Check for more than more alarm queue
-  int alarmExists = FALSE;
+  QueueHead *q = (QueueHead *)aq;
   // Check for multiple alarms
   if (k == AQ_ALARM) {
     // Return error if there already exists an alarm
-    for (int i = 0; i < q->size; i++) {
-      if (q->msgTypes[(q->curr + i) % CAPACITY] == AQ_ALARM) {
-        alarmExists = TRUE;
-      }
-    }
-  }
-  // Place differently depending on the queue type
-  if (k == AQ_ALARM) {
-    if (alarmExists == TRUE) {
+    if (q->alarmMsg != NULL) {
       return AQ_NO_ROOM;
     }
-    // Loops around to the end of the array if out of bounds
-    q->curr--;
-    if (q->curr <= 0) {
-      q->curr = CAPACITY - 1;
-    }
-    // Append message and message type to start and increment size by one
-    q->msgs[q->curr] = msg;
-    q->msgTypes[q->curr] = k;
-  } else {
-    // Append message and message type to the end and increment size by one
-    q->msgs[(q->curr + q->size) % CAPACITY] = msg;
-    q->msgTypes[(q->curr + q->size) % CAPACITY] = k;
+    q->alarmMsg = msg;
+    q->size++;
+    return 0;
   }
+  // Create new message node
+  NormalMsg *nmNew = malloc(sizeof(NormalMsg));
+  nmNew->normalMsg = msg;
+  nmNew->next = NULL;
   q->size++;
-  printf("curr: %i, size: %i\n", q->curr, q->size);
+  NormalMsg *nm = q->normalMsgs;
+  if (nm == NULL) {
+    q->normalMsgs = nmNew;
+    return 0;
+  }
+  while (nm->next != NULL) {
+    nm = nm->next;
+  }
+  nm->next = nmNew;
   return 0;
 }
 
 int aq_recv(AlarmQueue aq, void **msg) {
   // Cast aq to type QueueNode
-  Queue *q = (Queue *)aq;
+  QueueHead *q = (QueueHead *)aq;
   // Check if queue is empty
-  if (q->size == 0) {
-    return AQ_NO_MSG;
+  if (q->alarmMsg == NULL) {
+    if (q->normalMsgs == NULL) {
+      return AQ_NO_MSG;
+    }
+    NormalMsg *nm = q->normalMsgs;
+    q->normalMsgs = nm->next;
+    q->size--;
+    *msg = nm->normalMsg;
+    free(nm);
+    return AQ_NORMAL;
   }
-  *msg = q->msgs[q->curr];
-  MsgKind msgType = q->msgTypes[q->curr];
-  // Loops around to the end of the array if 0
-  q->curr++;
-  if (q->curr >= CAPACITY) {
-    q->curr = 0;
-  }
+  *msg = q->alarmMsg;
+  q->alarmMsg = NULL;
   q->size--;
-  return msgType;
+  return AQ_ALARM;
 }
 
-int aq_size(AlarmQueue aq) { return ((Queue *)aq)->size; }
+int aq_size(AlarmQueue aq) { return ((QueueHead *)aq)->size; }
 
 int aq_alarms(AlarmQueue aq) {
   // Cast aq to type QueueNode
-  Queue *q = (Queue *)aq;
-  // Number of alarm messages
-  int alarms = 0;
-  for (int i = 0; i < q->size; i++) {
-    if (q->msgTypes[(q->curr + i) % CAPACITY] == AQ_ALARM) {
-      alarms++;
-    }
+  QueueHead *q = (QueueHead *)aq;
+  if (q->alarmMsg == NULL) {
+    return 0;
   }
-  return alarms;
+  return 1;
 }
