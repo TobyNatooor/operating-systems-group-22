@@ -20,16 +20,12 @@ void *producer_alarms(void *arg) {
 void *producer_normal(void *arg) {
   msleep(400);
   put_normal(q, 3);
-  put_normal(q, 4);
 
   return 0;
 }
 
 void *consumer(void *arg) {
   msleep(800);
-  get(q);
-  get(q);
-  get(q);
   get(q);
 
   return 0;

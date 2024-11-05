@@ -45,7 +45,7 @@ int aq_send(AlarmQueue aq, void *msg, MsgKind k) {
   // Check for multiple alarms
   if (k == AQ_ALARM) {
     // Return error if there already exists an alarm
-    while (aq_alarms(aq) != 0) {
+    while (aq_alarms(aq) == 1) {
       pthread_cond_wait(&cond_send, &mutex);
     }
     q->alarmMsg = msg;

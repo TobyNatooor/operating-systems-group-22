@@ -12,6 +12,7 @@
 static AlarmQueue q;
 
 void *producer(void *arg) {
+  msleep(500);
   put_alarm(q, 1);
   put_normal(q, 2);
   put_normal(q, 3);
@@ -22,7 +23,6 @@ void *producer(void *arg) {
 }
 
 void *consumer(void *arg) {
-  msleep(500);
   assert(get(q) == 1);
   msleep(500);
   assert(get(q) == 5);
